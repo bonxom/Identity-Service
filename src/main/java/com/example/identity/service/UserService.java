@@ -46,7 +46,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    @PostAuthorize("returnObject.username == authentication.name")
+    @PostAuthorize("returnObject.username == authentication.name") //not true, because this save before authenticate
     public UserResponse UpdateUser(String id, UserUpdateRequest request){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -54,7 +54,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')") //this cannot catch by the GlobalExceptionHandler -> catch on the SecConfig layer
     public List<UserResponse> getUsers(){
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
