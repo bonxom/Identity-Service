@@ -41,7 +41,7 @@ public class UserService {
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
         System.out.println(roles);
-        user.setRoles(roles);
+        //user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -55,7 +55,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')") //this cannot catch by the GlobalExceptionHandler -> catch on the SecConfig layer
-    public List<UserResponse> getUsers(){
+    public List<UserResponse> getAll(){
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
@@ -76,12 +76,9 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse deleteUser(String id){
+    public void deleteUser(String id){
         boolean exited = userRepository.existsById(id);
+        if (!exited) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         userRepository.deleteById(id);
-        if (!exited) return UserResponse.builder()
-                .username("000")
-                .build();
-        return null;
     }
 }

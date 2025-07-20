@@ -83,7 +83,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("scope", buildScope(user.getRoles()))
+                //.claim("scope", buildScope(user.getRoles()))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 

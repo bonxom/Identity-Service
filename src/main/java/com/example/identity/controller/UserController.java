@@ -4,17 +4,12 @@ import com.example.identity.dto.request.ApiResponse;
 import com.example.identity.dto.request.UserCreationRequest;
 import com.example.identity.dto.request.UserUpdateRequest;
 import com.example.identity.dto.response.UserResponse;
-import com.example.identity.entity.User;
-import com.example.identity.exception.AppException;
-import com.example.identity.exception.ErrorCode;
-import com.example.identity.repository.UserRepository;
 import com.example.identity.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +45,7 @@ public class UserController {
 
 
         return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getUsers())
+                .result(userService.getAll())
                 .build();
     }
 
@@ -77,10 +72,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userID}")
-    ApiResponse<UserResponse> deleteUser(@PathVariable("userID") String userID){
-        UserResponse userResponse = userService.deleteUser(userID);
-        if (userResponse != null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        return ApiResponse.<UserResponse>builder()
+    ApiResponse<Void> deleteUser(@PathVariable("userID") String userID){
+        userService.deleteUser(userID);
+        return ApiResponse.<Void>builder()
                 .message("User has been deleted")
                 .build();
     }

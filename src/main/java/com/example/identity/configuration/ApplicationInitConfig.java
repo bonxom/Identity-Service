@@ -34,7 +34,7 @@ public class ApplicationInitConfig {
 
                 HashSet<String> roles = new HashSet<>();
                 roles.add(Role.ADMIN.name());
-                admin.setRoles(roles);
+                //admin.setRoles(roles);
 
                 userRepository.save(admin);
                 log.warn("Default admin has been created with default password: admin, please change it");
