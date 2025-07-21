@@ -41,6 +41,7 @@ public class SecurityConfig {
 //                        .hasAuthority("SCOPE_ADMIN")
 //                        .hasAuthority("ROLE_ADMIN") //after config
 //                        .hasRole(Role.ADMIN.name()) //user hasRole for better behavior
+//          using annotation perAuthorize and postAuthorize for instead
                         .anyRequest().authenticated());
 
         //allow request for user that submits true token
@@ -62,8 +63,9 @@ public class SecurityConfig {
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter(){
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_"); //config SCOPE_ to ROLE_ for better behavior
-
+        //jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_"); //config SCOPE_ to ROLE_ for better behavior
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+        //this prefix "ROLE_" config in the AuthenticationService
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;

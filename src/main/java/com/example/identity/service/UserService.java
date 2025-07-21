@@ -8,6 +8,7 @@ import com.example.identity.enums.Role;
 import com.example.identity.exception.AppException;
 import com.example.identity.exception.ErrorCode;
 import com.example.identity.mapper.UserMapper;
+import com.example.identity.repository.RoleRepository;
 import com.example.identity.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.List;
 public class UserService {
     //instead of using @Autowired, use @RequireArgConstructor (create Constructor for private final) -> cleaner
     UserRepository userRepository;
+    RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
@@ -38,10 +40,8 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
-        System.out.println(roles);
-        //user.setRoles(roles);
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -50,7 +50,14 @@ public class UserService {
     public UserResponse UpdateUser(String id, UserUpdateRequest request){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         userMapper.updateUser(user, request);
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
+
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
