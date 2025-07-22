@@ -14,14 +14,14 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
-    @Size(min = 3, message = "USERNAME_INVALID")
+    @Size(min = 6, message = "USERNAME_INVALID")
     String username;
 
     @Size(min = 8, message = "PASSWORD_INVALID")
     String password;
     String firstName;
     String lastName;
-    @DobConstraint(min = 18, message = "DOB_INVALID")
+    @DobConstraint(min = 16, message = "DOB_INVALID")
     LocalDate dob;
 
     List<String> roles;
