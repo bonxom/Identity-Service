@@ -47,12 +47,21 @@ public class AuthenticationService {
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refresh-duration}")
+    protected long REFRESH_DURATION;
+
+
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         String token = request.getToken();
         boolean valid = true;
 
         try{
-            verifiedToken(token);
+            verifiedToken(token, false);
         }catch(AppException e){
             valid = false;
         }
@@ -80,22 +89,32 @@ public class AuthenticationService {
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
-        SignedJWT signedJWT = verifiedToken(request.getToken());
+        try{// because user only want to log out, do not care token expired or not
 
-        String id = signedJWT.getJWTClaimsSet().getJWTID();
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            //must refresh token, because if token expired (but remain refresh time),
+            // this throw exception so repo has not saved this log out ID yet
+            //so user can call refresh the old token (in refresh time) to access system without valid login (get token)
+            //refresh token to save the log-out token to repo
+            SignedJWT signedJWT = verifiedToken(request.getToken(), true);
 
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(id)
-                .expiryTime(expiryTime)
-                .build();
+            String id = signedJWT.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        invalidatedTokenRepository.save(invalidatedToken);
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(id)
+                    .expiryTime(expiryTime)
+                    .build();
+
+            invalidatedTokenRepository.save(invalidatedToken);
+        } catch (AppException e){
+            log.info(e.getErrorCode().name() + ": Token is expired");
+        }
+
 
     }
 
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
-        SignedJWT signedJWT = verifiedToken(request.getToken());
+        SignedJWT signedJWT = verifiedToken(request.getToken(), true);
 
         String id = signedJWT.getJWTClaimsSet().getJWTID();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
@@ -118,14 +137,20 @@ public class AuthenticationService {
                 .build();
     }
 
-    private SignedJWT verifiedToken(String token) throws JOSEException, ParseException {
+    private SignedJWT verifiedToken(String token, boolean refresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
         boolean verified = signedJWT.verify(verifier);
 
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime = (refresh) ?
+                new Date(signedJWT.getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESH_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean expired = expiryTime.before(new Date());
 
         if (!verified || expired) throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -143,7 +168,7 @@ public class AuthenticationService {
                 .issuer("bonxom.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
                 ))
                 .claim("scope", buildScope(user))
                 .jwtID(UUID.randomUUID().toString())
