@@ -3,6 +3,7 @@ package com.example.identity.service;
 import com.example.identity.dto.request.UserCreationRequest;
 import com.example.identity.dto.request.UserUpdateRequest;
 import com.example.identity.dto.response.UserResponse;
+import com.example.identity.entity.Role;
 import com.example.identity.entity.User;
 import com.example.identity.exception.AppException;
 import com.example.identity.exception.ErrorCode;
@@ -42,7 +43,7 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        var roles = roleRepository.findAllById(request.getRoles());
+        List<Role> roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepository.save(user));
