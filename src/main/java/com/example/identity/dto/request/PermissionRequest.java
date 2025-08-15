@@ -1,6 +1,5 @@
 package com.example.identity.dto.request;
 
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,5 +12,4 @@ public class PermissionRequest {
 
     String name;
     String description;
-
 }

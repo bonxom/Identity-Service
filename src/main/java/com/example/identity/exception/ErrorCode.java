@@ -1,7 +1,8 @@
 package com.example.identity.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -13,8 +14,7 @@ public enum ErrorCode {
     PASSWORD_INVALID(2002, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
     DOB_INVALID(2003, "User must be at least {min} years old", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(3001, "Can not authenticate user", HttpStatus.UNAUTHORIZED),
-    UNAUTHORIZED(3002, "User is not allowed to access", HttpStatus.FORBIDDEN)
-    ;
+    UNAUTHORIZED(3002, "User is not allowed to access", HttpStatus.FORBIDDEN);
     private int code;
     private String message;
     private HttpStatus statusCode;

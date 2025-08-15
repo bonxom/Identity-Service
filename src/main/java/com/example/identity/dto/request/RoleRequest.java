@@ -1,10 +1,9 @@
 package com.example.identity.dto.request;
 
-import com.example.identity.entity.Permission;
+import java.util.Set;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -15,6 +14,5 @@ public class RoleRequest {
     String name;
     String description;
 
-    Set<String> permissions; //name
-
+    Set<String> permissions; // name
 }

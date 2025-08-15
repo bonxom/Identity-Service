@@ -1,20 +1,21 @@
 package com.example.identity.configuration;
 
-import com.example.identity.entity.User;
-import com.example.identity.enums.Role;
-import com.example.identity.repository.UserRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashSet;
+import com.example.identity.entity.User;
+import com.example.identity.enums.Role;
+import com.example.identity.repository.UserRepository;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
@@ -25,11 +26,12 @@ public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
 
     @Bean
-    //to avoid config in Unit Test
-    @ConditionalOnProperty(prefix = "spring",
-                        value = "datasource.driverClassName",
-                        havingValue =  "com.mysql.cj.jdbc.Driver")
-    ApplicationRunner applicationRunner(UserRepository userRepository){
+    // to avoid config in Unit Test
+    @ConditionalOnProperty(
+            prefix = "spring",
+            value = "datasource.driverClassName",
+            havingValue = "com.mysql.cj.jdbc.Driver")
+    ApplicationRunner applicationRunner(UserRepository userRepository) {
         log.info("Application Init Config: start");
         return args -> {
             if (!userRepository.existsByUsername("admin")) {
@@ -41,7 +43,7 @@ public class ApplicationInitConfig {
 
                 HashSet<String> roles = new HashSet<>();
                 roles.add(Role.ADMIN.name());
-                //admin.setRoles(roles);
+                // admin.setRoles(roles);
 
                 userRepository.save(admin);
                 log.warn("Default admin has been created with default password: admin, please change it");

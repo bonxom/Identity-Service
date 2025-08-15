@@ -14,68 +14,68 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration //this annotation make this class to init run when start (run all public method with @Bean)
-@EnableWebSecurity  //authorize in controller
-@EnableMethodSecurity  //authorize in method (service)
+@Configuration // this annotation make this class to init run when start (run all public method with @Bean)
+@EnableWebSecurity // authorize in controller
+@EnableMethodSecurity // authorize in method (service)
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINT = {"/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh"};
+    private final String[] PUBLIC_ENDPOINT = {
+        "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh"
+    };
+
     @Autowired
     CustomJwtDecoder customJwtDecoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        //public endpoint that everyone can send request
-        httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT)
-                        .permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/users/info")
-//                        .permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/users")
-//                        .hasAuthority("SCOPE_ADMIN")
-//                        .hasAuthority("ROLE_ADMIN") //after config
-//                        .hasRole(Role.ADMIN.name()) //user hasRole for better behavior
-//          using annotation perAuthorize and postAuthorize for instead
-                        .anyRequest().authenticated());
+        // public endpoint that everyone can send request
+        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT)
+                .permitAll()
+                //                        .requestMatchers(HttpMethod.GET, "/users/info")
+                //                        .permitAll()
+                //                        .requestMatchers(HttpMethod.GET, "/users")
+                //                        .hasAuthority("SCOPE_ADMIN")
+                //                        .hasAuthority("ROLE_ADMIN") //after config
+                //                        .hasRole(Role.ADMIN.name()) //user hasRole for better behavior
+                //          using annotation perAuthorize and postAuthorize for instead
+                .anyRequest()
+                .authenticated());
 
-        //allow request for user that submits true token
-        //configurer -> config decoder and authentication (Prefix, delimiter,...)
-        httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer -> jwtConfigurer
+        // allow request for user that submits true token
+        // configurer -> config decoder and authentication (Prefix, delimiter,...)
+        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-        );
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
-
-        //turn off csrf (default = on)
+        // turn off csrf (default = on)
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
     }
 
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter(){
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        //jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_"); //config SCOPE_ to ROLE_ for better behavior
+        // jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_"); //config SCOPE_ to ROLE_ for better behavior
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
-        //this prefix "ROLE_" config in the AuthenticationService
+        // this prefix "ROLE_" config in the AuthenticationService
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
 
-//    @Bean
-//    JwtDecoder jwtDecoder(){ //decode token
-//        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(),"HS512");
-//        return NimbusJwtDecoder
-//                .withSecretKey(secretKeySpec)
-//                .macAlgorithm(MacAlgorithm.HS512)
-//                .build();
-//    }
+    //    @Bean
+    //    JwtDecoder jwtDecoder(){ //decode token
+    //        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(),"HS512");
+    //        return NimbusJwtDecoder
+    //                .withSecretKey(secretKeySpec)
+    //                .macAlgorithm(MacAlgorithm.HS512)
+    //                .build();
+    //    }
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
 }

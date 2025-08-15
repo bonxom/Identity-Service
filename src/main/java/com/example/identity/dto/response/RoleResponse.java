@@ -1,9 +1,9 @@
 package com.example.identity.dto.response;
-import com.example.identity.entity.Permission;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor
